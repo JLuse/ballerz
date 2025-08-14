@@ -29,27 +29,19 @@ ballerz/
 
 ### Option 1: Automated Setup (Recommended)
 
-**For Unix/Linux/macOS:**
 ```bash
-git clone https://github.com/YOUR_USERNAME/fantasy-football-analytics.git
-cd fantasy-football-analytics
+git clone https://github.com/JLuse/ballerz.git
+cd ballerz
 chmod +x quick_start.sh
 ./quick_start.sh
-```
-
-**For Windows:**
-```cmd
-git clone https://github.com/YOUR_USERNAME/fantasy-football-analytics.git
-cd fantasy-football-analytics
-quick_start.bat
 ```
 
 ### Option 2: Manual Setup
 
 1. **Clone and navigate to the repository:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/fantasy-football-analytics.git
-   cd fantasy-football-analytics
+   git clone https://github.com/JLuse/ballerz.git
+   cd ballerz
    ```
 
 2. **Set up virtual environment:**
@@ -59,11 +51,7 @@ quick_start.bat
 
 3. **Activate virtual environment:**
    ```bash
-   # Unix/Linux/macOS
    source .venv/bin/activate
-   
-   # Windows
-   .venv\Scripts\activate
    ```
 
 4. **Train the Model:**

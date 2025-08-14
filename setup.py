@@ -40,18 +40,12 @@ def create_virtual_environment():
 
 def get_venv_python():
     """Get the path to the virtual environment Python executable."""
-    if platform.system() == "Windows":
-        return Path(".venv/Scripts/python.exe")
-    else:
-        return Path(".venv/bin/python")
+    return Path(".venv/bin/python")
 
 
 def get_venv_pip():
     """Get the path to the virtual environment pip executable."""
-    if platform.system() == "Windows":
-        return Path(".venv/Scripts/pip.exe")
-    else:
-        return Path(".venv/bin/pip")
+    return Path(".venv/bin/pip")
 
 
 def install_dependencies():
@@ -72,28 +66,18 @@ def install_dependencies():
 
 
 def create_activation_script():
-    """Create activation scripts for different shells."""
-    if platform.system() == "Windows":
-        # Windows activation script
-        with open("activate_env.bat", "w") as f:
-            f.write("@echo off\n")
-            f.write("echo Activating virtual environment...\n")
-            f.write(".venv\\Scripts\\activate.bat\n")
-            f.write("echo Virtual environment activated!\n")
-            f.write("echo You can now run: python train_baseline.py\n")
-        print("✅ Created activate_env.bat for Windows")
-    else:
-        # Unix activation script
-        with open("activate_env.sh", "w") as f:
-            f.write("#!/bin/bash\n")
-            f.write("echo 'Activating virtual environment...'\n")
-            f.write("source .venv/bin/activate\n")
-            f.write("echo 'Virtual environment activated!'\n")
-            f.write("echo 'You can now run: python train_baseline.py'\n")
-        
-        # Make the script executable
-        os.chmod("activate_env.sh", 0o755)
-        print("✅ Created activate_env.sh for Unix/Linux/macOS")
+    """Create activation script for Unix/Linux/macOS."""
+    # Unix activation script
+    with open("activate_env.sh", "w") as f:
+        f.write("#!/bin/bash\n")
+        f.write("echo 'Activating virtual environment...'\n")
+        f.write("source .venv/bin/activate\n")
+        f.write("echo 'Virtual environment activated!'\n")
+        f.write("echo 'You can now run: python train_baseline.py'\n")
+    
+    # Make the script executable
+    os.chmod("activate_env.sh", 0o755)
+    print("✅ Created activate_env.sh")
 
 
 def main():
@@ -117,16 +101,10 @@ def main():
     print("🎉 Setup complete!")
     print("=" * 50)
     
-    if platform.system() == "Windows":
-        print("\nTo activate the virtual environment:")
-        print("  activate_env.bat")
-        print("  OR")
-        print("  .venv\\Scripts\\activate")
-    else:
-        print("\nTo activate the virtual environment:")
-        print("  source activate_env.sh")
-        print("  OR")
-        print("  source .venv/bin/activate")
+    print("\nTo activate the virtual environment:")
+    print("  source activate_env.sh")
+    print("  OR")
+    print("  source .venv/bin/activate")
     
     print("\nAfter activation, you can run:")
     print("  python train_baseline.py          # Train with sample data")
