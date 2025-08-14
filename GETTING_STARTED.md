@@ -64,13 +64,29 @@ chmod +x quick_start.sh
    - Train a Random Forest model
    - Save the model to `models/baseline_rf_model.joblib`
 
-5. **Make Predictions:**
+5. **Set up NFL data (optional):**
+   ```bash
+   # Download and set up real NFL data
+   python -m src.data.nfl_data_integration --download
+   ```
+
+6. **Train with real data:**
+   ```bash
+   python train_with_real_data.py
+   ```
+   This will:
+   - Load real NFL data (7,548 RB player-weeks)
+   - Engineer 57 features from historical data
+   - Train a model on realistic projections
+   - Show real-world performance metrics
+
+7. **Make Predictions:**
    ```bash
    python predict.py
    ```
    This demonstrates how to use the trained model to make predictions on new data.
 
-6. **Run Tests:**
+8. **Run Tests:**
    ```bash
    python -m pytest tests/ -v
    ```

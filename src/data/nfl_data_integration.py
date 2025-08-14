@@ -9,6 +9,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import json
 from datetime import datetime
+import subprocess
+import sys
+import argparse
 
 from ..utils.config import load_config, get_data_paths, ensure_directories
 
@@ -142,7 +145,7 @@ class NFLDataIntegrator:
         Collect weekly data across multiple seasons and weeks.
         
         Args:
-            position: Player position
+            position: Player position (RB, WR, QB, TE only - excludes DB, LB)
             seasons: List of seasons to collect
             weeks: List of weeks to collect (1-18)
             
@@ -183,6 +186,59 @@ class NFLDataIntegrator:
         
         # Clean up column names
         combined_data = self.clean_column_names(combined_data)
+        
+        return combined_data
+    
+    def collect_offensive_positions_data(self, positions: List[str] = None, 
+                                       seasons: List[int] = None, 
+                                       weeks: List[int] = None) -> pd.DataFrame:
+        """
+        Collect data for offensive positions only, excluding defensive positions (DB, LB).
+        
+        Args:
+            positions: List of offensive positions (RB, WR, QB, TE)
+            seasons: List of seasons to collect
+            weeks: List of weeks to collect (1-18)
+            
+        Returns:
+            DataFrame with all offensive position data
+        """
+        # Define offensive positions (exclude DB, LB)
+        if positions is None:
+            positions = ["RB", "WR", "QB", "TE"]
+        
+        # Filter out defensive positions
+        offensive_positions = [pos for pos in positions if pos not in ["DB", "LB", "DEF", "DST"]]
+        
+        if seasons is None:
+            seasons = [2022, 2023]
+        
+        if weeks is None:
+            weeks = list(range(1, 19))  # Weeks 1-18
+        
+        all_data = []
+        
+        for position in offensive_positions:
+            print(f"Collecting data for {position}...")
+            try:
+                position_data = self.collect_weekly_data(position, seasons, weeks)
+                all_data.append(position_data)
+                print(f"✅ Collected {len(position_data)} records for {position}")
+            except Exception as e:
+                print(f"⚠️  Warning: Could not collect data for {position}: {e}")
+                continue
+        
+        if not all_data:
+            raise ValueError("No offensive position data could be loaded")
+        
+        # Combine all offensive position data
+        combined_data = pd.concat(all_data, ignore_index=True)
+        
+        # Clean up column names
+        combined_data = self.clean_column_names(combined_data)
+        
+        print(f"✅ Total offensive position records: {len(combined_data)}")
+        print(f"Positions included: {combined_data['position'].unique()}")
         
         return combined_data
     
@@ -271,29 +327,107 @@ class NFLDataIntegrator:
         return available_data
 
 
-def main():
-    """Main function to test NFL data integration."""
-    print("Testing NFL Data Integration...")
+def download_nfl_data():
+    """Download NFL data repository if it doesn't exist."""
+    nfl_data_path = Path("NFL-Data")
     
+    if nfl_data_path.exists():
+        print("✅ NFL-Data repository already exists")
+        return True
+    
+    print("📥 Downloading NFL-Data repository...")
+    try:
+        subprocess.run([
+            "git", "clone", "https://github.com/hvpkod/NFL-Data.git"
+        ], check=True)
+        print("✅ NFL-Data repository downloaded successfully")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Error downloading NFL-Data: {e}")
+        return False
+    except FileNotFoundError:
+        print("❌ Git not found. Please install Git and try again.")
+        return False
+
+
+def explore_data():
+    """Explore the NFL data structure."""
     try:
         integrator = NFLDataIntegrator()
         
+        print("🔍 Exploring NFL Data Structure...")
+        print("=" * 50)
+        
         # Check available data
         available = integrator.get_available_data()
-        print(f"Available data: {available}")
+        print(f"Available seasons: {list(available.keys())}")
         
-        # Collect RB data for 2023
-        print("\nCollecting RB data for 2023...")
-        rb_data = integrator.collect_weekly_data("RB", seasons=[2023], weeks=[1, 2, 3])
+        # Show data structure
+        data_path = Path("NFL-Data/NFL-data-Players")
+        if data_path.exists():
+            print(f"\nData files in {data_path}:")
+            for file in sorted(data_path.glob("*.csv")):
+                print(f"  - {file.name}")
         
-        # Save data
-        integrator.save_integrated_data(rb_data, "RB", "nfl_rb_2023_weeks1-3.csv")
-        
-        print("\nSample data:")
-        print(rb_data[['player_name', 'team', 'week', 'fantasy_points', 'projection', 'over_performed']].head())
+        # Test data loading
+        print("\n🧪 Testing data loading...")
+        data = integrator.collect_weekly_data("RB", seasons=[2021], weeks=[1, 2, 3])
+        print(f"✅ Successfully loaded {len(data)} records")
+        print(f"Columns: {list(data.columns)}")
+        print(f"Sample data:\n{data.head()}")
         
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error exploring data: {e}")
+
+
+def main():
+    """Main function with command-line interface."""
+    parser = argparse.ArgumentParser(description="NFL Data Integration Tool")
+    parser.add_argument("--download", action="store_true", 
+                       help="Download NFL-Data repository")
+    parser.add_argument("--explore", action="store_true", 
+                       help="Explore data structure")
+    parser.add_argument("--test", action="store_true", 
+                       help="Test data integration")
+    
+    args = parser.parse_args()
+    
+    if args.download:
+        download_nfl_data()
+    elif args.explore:
+        explore_data()
+    elif args.test:
+        print("🧪 Testing NFL Data Integration...")
+        try:
+            integrator = NFLDataIntegrator()
+            
+            # Check available data
+            available = integrator.get_available_data()
+            print(f"Available data: {available}")
+            
+            # Load and merge data
+            data = integrator.collect_weekly_data("RB", seasons=[2021], weeks=[1, 2, 3])
+            print(f"✅ Successfully loaded {len(data)} records")
+            
+            # Show sample
+            print("\nSample data:")
+            print(data[['player_name', 'team', 'week', 'fantasy_points', 'projection', 'over_performed']].head())
+            
+        except Exception as e:
+            print(f"❌ Error: {e}")
+    else:
+        # Default behavior - test integration
+        print("🧪 Testing NFL Data Integration...")
+        try:
+            integrator = NFLDataIntegrator()
+            data = integrator.collect_weekly_data("RB", seasons=[2021], weeks=[1, 2, 3])
+            print(f"✅ Successfully loaded {len(data)} records")
+            print(f"Data shape: {data.shape}")
+            if 'over_performed' in data.columns:
+                print(f"Target distribution: {data['over_performed'].value_counts(normalize=True)}")
+        except Exception as e:
+            print(f"❌ Error: {e}")
+            print("\n💡 Try running with --download to get the NFL data first")
 
 
 if __name__ == "__main__":

@@ -37,29 +37,29 @@ def main():
     available_data = integrator.get_available_data()
     print(f"Available seasons: {list(available_data.keys())}")
     
-    # Collect RB data for 2022-2023 (more realistic dataset)
-    print("\n3. Collecting RB data for 2022-2023...")
-    rb_data = integrator.collect_weekly_data(
-        position="RB", 
+    # Collect offensive position data (excluding defensive positions DB, LB)
+    print("\n3. Collecting offensive position data for 2022-2023...")
+    offensive_data = integrator.collect_offensive_positions_data(
+        positions=["RB", "WR", "QB", "TE"],  # Offensive positions only
         seasons=[2022, 2023], 
         weeks=list(range(1, 19))  # All weeks
     )
     
     # Save raw integrated data
-    integrator.save_integrated_data(rb_data, "RB", "nfl_rb_2022_2023.csv")
+    integrator.save_integrated_data(offensive_data, "OFFENSIVE", "nfl_offensive_2022_2023.csv")
     
     # Step 2: Feature Engineering
     print("\n4. Engineering features...")
     engineer = FeatureEngineer()
-    engineered_data = engineer.engineer_all_features(rb_data)
+    engineered_data = engineer.engineer_all_features(offensive_data)
     
     # Save engineered data
-    engineer.save_engineered_data(engineered_data, "nfl_rb_engineered.csv")
+    engineer.save_engineered_data(engineered_data, "nfl_offensive_engineered.csv")
     
     # Step 3: Model Training and Evaluation
     print("\n5. Training baseline model...")
     model = BaselineModel()
-    results = model.train_and_evaluate("data/processed/nfl_rb_engineered.csv")
+    results = model.train_and_evaluate("data/processed/nfl_offensive_engineered.csv")
     
     # Step 4: Results Summary
     print("\n" + "=" * 60)
@@ -84,6 +84,7 @@ def main():
     print(f"\nData Quality Insights:")
     print(f"- Total records: {len(engineered_data)}")
     print(f"- Unique players: {engineered_data['player_name'].nunique()}")
+    print(f"- Positions: {engineered_data['position'].unique()}")
     print(f"- Seasons: {engineered_data['season'].unique()}")
     print(f"- Target distribution: {engineered_data['target'].value_counts().to_dict()}")
     
@@ -97,6 +98,8 @@ def main():
     print("3. More realistic model performance metrics")
     print("4. Real player names and teams")
     print("5. Actual opponent matchups")
+    print("6. Multiple offensive positions (RB, WR, QB, TE)")
+    print("7. Excludes defensive positions (DB, LB)")
     
     print("\nNext steps:")
     print("1. Analyze feature importance for real insights")

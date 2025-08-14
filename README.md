@@ -56,7 +56,13 @@ chmod +x quick_start.sh
    # Unix/Linux/macOS
    source .venv/bin/activate
 
-4. **Run the tool:**
+4. **Set up NFL data (optional):**
+   ```bash
+   # Download and set up real NFL data
+   python -m src.data.nfl_data_integration --download
+   ```
+
+5. **Run the tool:**
    ```bash
    # Train with sample data
    python train_baseline.py
