@@ -29,7 +29,7 @@ ballerz/
 
 ## Getting Started
 
-### 🏈 Quick Start (Recommended)
+### 🏈 Quick Start
 
 ```bash
 git clone https://github.com/JLuse/ballerz.git
