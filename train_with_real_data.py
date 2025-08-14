@@ -1,0 +1,117 @@
+#!/usr/bin/env python3
+"""
+Training script using real NFL data from the hvpkod/NFL-Data repository.
+This script demonstrates how to use actual fantasy football data for model training.
+"""
+
+import sys
+from pathlib import Path
+
+# Add src to path for imports
+sys.path.append(str(Path(__file__).parent / "src"))
+
+from src.data.nfl_data_integration import NFLDataIntegrator
+from src.features.feature_engineering import FeatureEngineer
+from src.models.baseline_model import BaselineModel
+from src.utils.config import load_config, ensure_directories
+
+
+def main():
+    """
+    Run the complete fantasy football analytics pipeline with real NFL data.
+    """
+    print("=" * 60)
+    print("FANTASY FOOTBALL ANALYTICS - REAL NFL DATA TRAINING")
+    print("=" * 60)
+    
+    # Load configuration
+    print("\n1. Loading configuration...")
+    config = load_config()
+    ensure_directories(config)
+    
+    # Step 1: Integrate Real NFL Data
+    print("\n2. Integrating real NFL data...")
+    integrator = NFLDataIntegrator()
+    
+    # Check available data
+    available_data = integrator.get_available_data()
+    print(f"Available seasons: {list(available_data.keys())}")
+    
+    # Collect RB data for 2022-2023 (more realistic dataset)
+    print("\n3. Collecting RB data for 2022-2023...")
+    rb_data = integrator.collect_weekly_data(
+        position="RB", 
+        seasons=[2022, 2023], 
+        weeks=list(range(1, 19))  # All weeks
+    )
+    
+    # Save raw integrated data
+    integrator.save_integrated_data(rb_data, "RB", "nfl_rb_2022_2023.csv")
+    
+    # Step 2: Feature Engineering
+    print("\n4. Engineering features...")
+    engineer = FeatureEngineer()
+    engineered_data = engineer.engineer_all_features(rb_data)
+    
+    # Save engineered data
+    engineer.save_engineered_data(engineered_data, "nfl_rb_engineered.csv")
+    
+    # Step 3: Model Training and Evaluation
+    print("\n5. Training baseline model...")
+    model = BaselineModel()
+    results = model.train_and_evaluate("data/processed/nfl_rb_engineered.csv")
+    
+    # Step 4: Results Summary
+    print("\n" + "=" * 60)
+    print("REAL NFL DATA TRAINING RESULTS")
+    print("=" * 60)
+    
+    print(f"Cross-validation accuracy: {results['cv_accuracy_mean']:.3f} (+/- {results['cv_accuracy_std'] * 2:.3f})")
+    
+    if 'test_accuracy' in results:
+        print(f"Test set accuracy: {results['test_accuracy']:.3f}")
+        print(f"Test set AUC: {results['test_auc']:.3f}")
+    
+    print(f"\nModel saved to: {results['model_path']}")
+    
+    # Feature importance summary
+    if 'feature_importance' in results:
+        print("\nTop 10 Most Important Features:")
+        for i, feature in enumerate(results['feature_importance'][:10]):
+            print(f"  {i+1}. {feature['feature']}: {feature['importance']:.4f}")
+    
+    # Data quality insights
+    print(f"\nData Quality Insights:")
+    print(f"- Total records: {len(engineered_data)}")
+    print(f"- Unique players: {engineered_data['player_name'].nunique()}")
+    print(f"- Seasons: {engineered_data['season'].unique()}")
+    print(f"- Target distribution: {engineered_data['target'].value_counts().to_dict()}")
+    
+    print("\n" + "=" * 60)
+    print("REAL DATA PIPELINE COMPLETE!")
+    print("=" * 60)
+    
+    print("\nKey Differences from Sample Data:")
+    print("1. Real performance patterns and variance")
+    print("2. Actual projection accuracy challenges")
+    print("3. More realistic model performance metrics")
+    print("4. Real player names and teams")
+    print("5. Actual opponent matchups")
+    
+    print("\nNext steps:")
+    print("1. Analyze feature importance for real insights")
+    print("2. Add opponent defensive stats")
+    print("3. Include weather and injury data")
+    print("4. Try different algorithms")
+    print("5. Expand to other positions")
+    
+    return results
+
+
+if __name__ == "__main__":
+    try:
+        results = main()
+    except Exception as e:
+        print(f"\nError during training: {e}")
+        print("Please check your configuration and data files.")
+        sys.exit(1)

@@ -1,0 +1,57 @@
+# Fantasy Football Analytics Configuration
+
+# Data Sources
+data_sources:
+  fantasy_pros: "https://www.fantasypros.com/nfl/projections/"
+  pfr: "https://www.pro-football-reference.com/"
+  espn: "https://www.espn.com/nfl/stats"
+  
+# Data Collection
+data_collection:
+  seasons: [2022, 2023, 2024]  # Start with recent seasons
+  positions: ["RB"]  # Start with RBs for MVP
+  weeks_per_season: 18
+  
+# Feature Engineering
+features:
+  # Player stats to include
+  player_stats:
+    - "rushing_yards"
+    - "rushing_touchdowns"
+    - "receptions"
+    - "receiving_yards"
+    - "receiving_touchdowns"
+    - "fumbles_lost"
+  
+  # Rolling averages (weeks)
+  rolling_windows: [3, 5]
+  
+  # Opponent features
+  opponent_stats:
+    - "opponent_rush_defense_rank"
+    - "opponent_points_allowed"
+    
+# Model Configuration
+model:
+  algorithm: "RandomForestClassifier"
+  test_size: 0.2
+  random_state: 42
+  
+  # Random Forest parameters
+  random_forest:
+    n_estimators: 100
+    max_depth: 10
+    min_samples_split: 5
+    min_samples_leaf: 2
+    
+# Evaluation
+evaluation:
+  metrics: ["accuracy", "precision", "recall", "f1", "roc_auc"]
+  cross_validation_folds: 5
+  
+# File Paths
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  models: "models"
+  results: "results"
