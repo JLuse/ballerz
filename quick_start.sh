@@ -3,7 +3,7 @@
 # Fantasy Football Analytics Tool - Quick Start Script
 # This script automatically sets up the virtual environment and installs dependencies
 
-echo "🚀 Fantasy Football Analytics Tool - Quick Start"
+echo "🏈 Fantasy Football Analytics Tool - Quick Start"
 echo "================================================"
 
 # Check if Python is installed

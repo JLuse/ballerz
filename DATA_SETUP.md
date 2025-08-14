@@ -2,7 +2,7 @@
 
 To use the real NFL data features in this project, you need to download and set up the data separately.
 
-## 🚀 Quick Data Setup
+## 🏈 Quick Data Setup
 
 ### Option 1: Automated Data Download (Recommended)
 

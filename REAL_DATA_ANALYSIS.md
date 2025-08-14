@@ -109,7 +109,7 @@ Both actual and projected rankings are important features, suggesting that relat
 ### **4. Touchdowns Drive Performance**
 Rushing touchdowns (both actual and projected) are among the top features, highlighting their importance in RB fantasy scoring.
 
-## 🚀 Next Steps for Improvement
+## 🏈 Next Steps for Improvement
 
 ### **1. Data Expansion**
 - **More Seasons**: Include 2015-2021 data for larger dataset

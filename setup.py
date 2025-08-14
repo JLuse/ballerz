@@ -82,7 +82,7 @@ def create_activation_script():
 
 def main():
     """Main setup function."""
-    print("🚀 Setting up Fantasy Football Analytics Tool")
+    print("🏈 Setting up Fantasy Football Analytics Tool")
     print("=" * 50)
     
     # Check Python version

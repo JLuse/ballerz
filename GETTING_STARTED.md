@@ -25,9 +25,9 @@ ballerz/
 └── config/                # Configuration files
 ```
 
-## 🚀 Quick Start
+## 🏈 Quick Start
 
-### Option 1: Automated Setup (Recommended)
+### Option 1: Automated Setup
 
 ```bash
 git clone https://github.com/JLuse/ballerz.git
