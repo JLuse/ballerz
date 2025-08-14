@@ -27,31 +27,65 @@ ballerz/
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
+### Option 1: Automated Setup (Recommended)
+
+**For Unix/Linux/macOS:**
 ```bash
-pip install -r requirements.txt
+git clone https://github.com/YOUR_USERNAME/fantasy-football-analytics.git
+cd fantasy-football-analytics
+chmod +x quick_start.sh
+./quick_start.sh
 ```
 
-### 2. Train the Model
-```bash
-python train_baseline.py
+**For Windows:**
+```cmd
+git clone https://github.com/YOUR_USERNAME/fantasy-football-analytics.git
+cd fantasy-football-analytics
+quick_start.bat
 ```
-This will:
-- Generate sample RB data (1800 records)
-- Engineer 57 features
-- Train a Random Forest model
-- Save the model to `models/baseline_rf_model.joblib`
 
-### 3. Make Predictions
-```bash
-python predict.py
-```
-This demonstrates how to use the trained model to make predictions on new data.
+### Option 2: Manual Setup
 
-### 4. Run Tests
-```bash
-python -m pytest tests/ -v
-```
+1. **Clone and navigate to the repository:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/fantasy-football-analytics.git
+   cd fantasy-football-analytics
+   ```
+
+2. **Set up virtual environment:**
+   ```bash
+   python setup.py
+   ```
+
+3. **Activate virtual environment:**
+   ```bash
+   # Unix/Linux/macOS
+   source .venv/bin/activate
+   
+   # Windows
+   .venv\Scripts\activate
+   ```
+
+4. **Train the Model:**
+   ```bash
+   python train_baseline.py
+   ```
+   This will:
+   - Generate sample RB data (1800 records)
+   - Engineer 57 features
+   - Train a Random Forest model
+   - Save the model to `models/baseline_rf_model.joblib`
+
+5. **Make Predictions:**
+   ```bash
+   python predict.py
+   ```
+   This demonstrates how to use the trained model to make predictions on new data.
+
+6. **Run Tests:**
+   ```bash
+   python -m pytest tests/ -v
+   ```
 
 ## 📊 Current Results
 

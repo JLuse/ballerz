@@ -29,15 +29,44 @@ ballerz/
 
 ## Getting Started
 
-### Option 1: Sample Data (Quick Start)
-1. Install dependencies: `pip install -r requirements.txt`
-2. Train with sample data: `python train_baseline.py`
-3. Make predictions: `python predict.py`
+### 🚀 Quick Start (Recommended)
 
-### Option 2: Real NFL Data (Recommended)
-1. Install dependencies: `pip install -r requirements.txt`
-2. Train with real NFL data: `python train_with_real_data.py`
-3. Explore the data: `python -m src.data.nfl_data_integration`
+```bash
+git clone https://github.com/JLuse/ballerz.git
+cd ballerz
+chmod +x quick_start.sh
+./quick_start.sh
+```
+
+### 🔧 Manual Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/JLuse/ballerz.git
+   cd ballerz
+   ```
+
+2. **Set up virtual environment:**
+   ```bash
+   python setup.py
+   ```
+
+3. **Activate virtual environment:**
+   ```bash
+   # Unix/Linux/macOS
+   source .venv/bin/activate
+
+4. **Run the tool:**
+   ```bash
+   # Train with sample data
+   python train_baseline.py
+   
+   # Train with real NFL data
+   python train_with_real_data.py
+   
+   # Make predictions
+   python predict.py
+   ```
 
 ## Development Approach
 
