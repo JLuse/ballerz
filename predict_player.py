@@ -67,25 +67,67 @@ class PlayerPredictor:
             return None
     
     def create_sample_player_data(self, player_name: str, week: int, season: int) -> pd.DataFrame:
-        """Create sample player data for demonstration."""
-        # This is a placeholder - in reality, you'd load actual player data
+        """Create varied sample player data for demonstration."""
+        # Create different data based on player name to simulate real differences
+        import hashlib
+        
+        # Use player name to generate consistent but different data
+        name_hash = int(hashlib.md5(player_name.encode()).hexdigest()[:8], 16)
+        np.random.seed(name_hash + week + season)  # Consistent but varied per player
+        
+        # Generate varied stats based on player name
+        base_rushing = 80 + (name_hash % 60)  # 80-140 yards
+        base_receiving = 20 + (name_hash % 40)  # 20-60 yards
+        base_projection = 12 + (name_hash % 8)  # 12-20 points
+        
+        # Add some randomness
+        rushing_yards = max(0, base_rushing + np.random.randint(-20, 21))
+        receiving_yards = max(0, base_receiving + np.random.randint(-10, 11))
+        rushing_tds = np.random.randint(0, 3)
+        receiving_tds = np.random.randint(0, 2)
+        carries = max(10, rushing_yards // 4 + np.random.randint(-3, 4))
+        receptions = max(0, receiving_yards // 8 + np.random.randint(-1, 2))
+        targets = receptions + np.random.randint(0, 3)
+        fumbles = np.random.randint(0, 2)
+        
+        # Calculate fantasy points (standard scoring)
+        fantasy_points = (
+            rushing_yards * 0.1 +
+            rushing_tds * 6 +
+            receptions * 1 +
+            receiving_yards * 0.1 +
+            receiving_tds * 6 -
+            fumbles * 2
+        )
+        
+        # Vary projection based on player performance
+        projection = base_projection + np.random.randint(-3, 4)
+        
+        # Determine team based on player name (simplified)
+        teams = ['CIN', 'SF', 'LAC', 'NYG', 'TEN', 'CLE', 'LV', 'DET', 'NO', 'NYJ']
+        team = teams[name_hash % len(teams)]
+        
+        # Determine opponent (simplified)
+        opponents = ['BAL', 'PIT', 'CLE', 'CIN', 'BUF', 'MIA', 'NE', 'NYJ', 'KC', 'DEN']
+        opponent = opponents[(name_hash + week) % len(opponents)]
+        
         sample_data = pd.DataFrame({
             'player_name': [player_name],
             'week': [week],
             'season': [season],
-            'position': ['RB'],  # Default to RB
-            'team': ['UNK'],
-            'opponent': ['UNK'],
-            'rushing_yards': [100],
-            'rushing_touchdowns': [1],
-            'receptions': [3],
-            'receiving_yards': [25],
-            'receiving_touchdowns': [0],
-            'fumbles_lost': [0],
-            'carries': [20],
-            'targets': [5],
-            'fantasy_points': [18.5],
-            'projection': [15.0],
+            'position': ['RB'],
+            'team': [team],
+            'opponent': [opponent],
+            'rushing_yards': [rushing_yards],
+            'rushing_touchdowns': [rushing_tds],
+            'receptions': [receptions],
+            'receiving_yards': [receiving_yards],
+            'receiving_touchdowns': [receiving_tds],
+            'fumbles_lost': [fumbles],
+            'carries': [carries],
+            'targets': [targets],
+            'fantasy_points': [fantasy_points],
+            'projection': [projection],
             'player_id': [f"{player_name.lower().replace(' ', '_')}_{season}"]
         })
         
