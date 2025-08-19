@@ -206,6 +206,105 @@ class BaselineModel:
         
         return feature_importance_df
     
+    def load_model(self, model_path: str = "models/baseline_rf_model.joblib"):
+        """
+        Load a trained model from disk.
+        
+        Args:
+            model_path: Path to the saved model file
+        """
+        model_file = Path(model_path)
+        if not model_file.exists():
+            raise FileNotFoundError(f"Model file not found: {model_path}")
+        
+        # Load model
+        self.model = joblib.load(model_file)
+        
+        # Load feature columns
+        feature_path = model_file.parent / "feature_columns.txt"
+        if feature_path.exists():
+            with open(feature_path, 'r') as f:
+                self.feature_columns = [line.strip() for line in f.readlines()]
+        
+        print(f"Model loaded from: {model_path}")
+    
+    def predict_single_player(self, player_features: pd.Series) -> int:
+        """
+        Predict whether a single player will over-perform.
+        
+        Args:
+            player_features: Series with player features
+            
+        Returns:
+            1 if predicted to over-perform, 0 otherwise
+        """
+        if self.model is None:
+            raise ValueError("No model loaded. Call load_model() first.")
+        
+        # Select only the features used by the model
+        if self.feature_columns:
+            features = player_features[self.feature_columns].fillna(0)
+        else:
+            features = player_features.fillna(0)
+        
+        # Reshape for prediction
+        features_2d = features.values.reshape(1, -1)
+        
+        # Make prediction
+        prediction = self.model.predict(features_2d)[0]
+        return prediction
+    
+    def predict_proba_single_player(self, player_features: pd.Series) -> np.ndarray:
+        """
+        Get prediction probabilities for a single player.
+        
+        Args:
+            player_features: Series with player features
+            
+        Returns:
+            Array with [under_perform_prob, over_perform_prob]
+        """
+        if self.model is None:
+            raise ValueError("No model loaded. Call load_model() first.")
+        
+        # Select only the features used by the model
+        if self.feature_columns:
+            features = player_features[self.feature_columns].fillna(0)
+        else:
+            features = player_features.fillna(0)
+        
+        # Reshape for prediction
+        features_2d = features.values.reshape(1, -1)
+        
+        # Get probabilities
+        probabilities = self.model.predict_proba(features_2d)[0]
+        return probabilities
+    
+    def get_feature_importance(self) -> list:
+        """
+        Get feature importance from the trained model.
+        
+        Returns:
+            List of dictionaries with feature names and importance scores
+        """
+        if self.model is None:
+            raise ValueError("No model loaded. Call load_model() first.")
+        
+        if not hasattr(self.model, 'feature_importances_'):
+            return []
+        
+        feature_importance = []
+        for i, importance in enumerate(self.model.feature_importances_):
+            feature_name = self.feature_columns[i] if self.feature_columns else f"feature_{i}"
+            feature_importance.append({
+                "feature": feature_name,
+                "importance": importance
+            })
+        
+        # Sort by importance
+        feature_importance.sort(key=lambda x: x['importance'], reverse=True)
+        return feature_importance
+    
     def save_model(self, model_name: str = "baseline_rf_model.joblib") -> Path:
         """
         Save the trained model to disk.
