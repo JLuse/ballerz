@@ -14,6 +14,7 @@ import sys
 import argparse
 
 from ..utils.config import load_config, get_data_paths, ensure_directories
+from .player_metadata import PlayerMetadataIntegrator
 
 
 class NFLDataIntegrator:
@@ -241,6 +242,37 @@ class NFLDataIntegrator:
         print(f"Positions included: {combined_data['position'].unique()}")
         
         return combined_data
+    
+    def collect_offensive_positions_data_with_age(self, positions: List[str] = None, 
+                                                seasons: List[int] = None, 
+                                                weeks: List[int] = None) -> pd.DataFrame:
+        """
+        Collect data for offensive positions with age and experience data.
+        
+        Args:
+            positions: List of offensive positions (RB, WR, QB, TE)
+            seasons: List of seasons to collect
+            weeks: List of weeks to collect (1-18)
+            
+        Returns:
+            DataFrame with all offensive position data including age
+        """
+        # First collect the regular data
+        data = self.collect_offensive_positions_data(positions, seasons, weeks)
+        
+        # Add age and experience data
+        print("\n🔗 Integrating player age and experience data...")
+        metadata_integrator = PlayerMetadataIntegrator()
+        data_with_age = metadata_integrator.add_player_metadata(data)
+        
+        # Create additional age-related features
+        data_with_age = metadata_integrator.create_age_features(data_with_age)
+        
+        # Get age summary
+        age_summary = metadata_integrator.get_player_age_summary(data_with_age)
+        print(f"📊 Age data summary: {age_summary}")
+        
+        return data_with_age
     
     def clean_column_names(self, df: pd.DataFrame) -> pd.DataFrame:
         """

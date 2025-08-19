@@ -111,6 +111,12 @@ class PlayerPredictor:
         opponents = ['BAL', 'PIT', 'CLE', 'CIN', 'BUF', 'MIA', 'NE', 'NYJ', 'KC', 'DEN']
         opponent = opponents[(name_hash + week) % len(opponents)]
         
+        # Generate age and experience data
+        base_age = 24 + (name_hash % 8)  # 24-32 years old
+        age = base_age + (season - 2022)  # Age increases with seasons
+        games_played = 48 + (name_hash % 64) + (season - 2022) * 16  # Experience increases
+        games_started = games_played * 0.7  # Rough estimate of starts
+        
         sample_data = pd.DataFrame({
             'player_name': [player_name],
             'week': [week],
@@ -118,17 +124,61 @@ class PlayerPredictor:
             'position': ['RB'],
             'team': [team],
             'opponent': [opponent],
-            'rushing_yards': [rushing_yards],
-            'rushing_touchdowns': [rushing_tds],
-            'receptions': [receptions],
-            'receiving_yards': [receiving_yards],
-            'receiving_touchdowns': [receiving_tds],
-            'fumbles_lost': [fumbles],
-            'carries': [carries],
+            # Actual performance stats (matching NFL data column names)
+            'PassingYDS_actual': [0],
+            'PassingTD_actual': [0],
+            'PassingInt_actual': [0],
+            'RushingYDS_actual': [rushing_yards],
+            'RushingTD_actual': [rushing_tds],
+            'ReceivingRec_actual': [receptions],
+            'ReceivingYDS_actual': [receiving_yards],
+            'ReceivingTD_actual': [receiving_tds],
+            'RetTD_actual': [0],
+            'FumTD_actual': [0],
+            '2PT_actual': [0],
+            'Fum_actual': [fumbles],
+            'FanPtsAgainst-pts': [0],
+            'TouchReceptions': [receptions],
+            'Touches': [carries + receptions],
+            'TargetsReceptions': [targets],
             'targets': [targets],
+            'carries': [carries],
+            'ReceptionPercentage': [receptions / max(targets, 1) * 100],
+            'RzTarget': [0],
+            'RzTouch': [0],
+            'RzG2G': [0],
+            'Rank_actual': [0],
+            'TotalPoints_actual': [fantasy_points],
+            # Projected stats
+            'PassingYDS_projected': [0],
+            'PassingTD_projected': [0],
+            'PassingInt_projected': [0],
+            'RushingYDS_projected': [rushing_yards * 0.9],
+            'RushingTD_projected': [rushing_tds],
+            'ReceivingRec_projected': [receptions],
+            'ReceivingYDS_projected': [receiving_yards * 0.9],
+            'ReceivingTD_projected': [receiving_tds],
+            'RetTD_projected': [0],
+            'FumTD_projected': [0],
+            '2PT_projected': [0],
+            'Fum_projected': [fumbles],
+            'PlayerWeekProjectedPts': [projection],
+            'Rank_projected': [0],
+            'TotalPoints_projected': [projection],
+            'ProjectionDiff': [fantasy_points - projection],
+            # Additional required columns
             'fantasy_points': [fantasy_points],
             'projection': [projection],
-            'player_id': [f"{player_name.lower().replace(' ', '_')}_{season}"]
+            'over_performed': [1 if fantasy_points > projection else 0],
+            # Age and experience data
+            'player_age': [age],
+            'games_played': [games_played],
+            'games_started': [games_started],
+            'is_rookie': [1 if age <= 23 else 0],
+            'is_veteran': [1 if age >= 30 else 0],
+            'is_prime_age': [1 if 25 <= age <= 28 else 0],
+            'is_experienced': [1 if games_played >= 48 else 0],
+            'games_per_season': [games_played / max(season - 2015, 1)]
         })
         
         return sample_data

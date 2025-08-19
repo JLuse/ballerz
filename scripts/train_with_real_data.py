@@ -37,9 +37,9 @@ def main():
     available_data = integrator.get_available_data()
     print(f"Available seasons: {list(available_data.keys())}")
     
-    # Collect offensive position data (excluding defensive positions DB, LB)
-    print("\n3. Collecting offensive position data for 2022-2023...")
-    offensive_data = integrator.collect_offensive_positions_data(
+    # Collect offensive position data with age information (excluding defensive positions DB, LB)
+    print("\n3. Collecting offensive position data with age for 2022-2023...")
+    offensive_data = integrator.collect_offensive_positions_data_with_age(
         positions=["RB", "WR", "QB", "TE"],  # Offensive positions only
         seasons=[2022, 2023], 
         weeks=list(range(1, 19))  # All weeks
@@ -88,6 +88,15 @@ def main():
     print(f"- Seasons: {engineered_data['season'].unique()}")
     print(f"- Target distribution: {engineered_data['target'].value_counts().to_dict()}")
     
+    # Age data insights
+    if 'player_age' in engineered_data.columns:
+        age_data = engineered_data['player_age'].dropna()
+        if not age_data.empty:
+            print(f"- Players with age data: {len(age_data.unique())}")
+            print(f"- Average player age: {age_data.mean():.1f}")
+            print(f"- Age range: {age_data.min():.0f}-{age_data.max():.0f}")
+            print(f"- Age categories: {engineered_data['age_category'].value_counts().to_dict()}")
+    
     print("\n" + "=" * 60)
     print("REAL DATA PIPELINE COMPLETE!")
     print("=" * 60)
@@ -100,6 +109,8 @@ def main():
     print("5. Actual opponent matchups")
     print("6. Multiple offensive positions (RB, WR, QB, TE)")
     print("7. Excludes defensive positions (DB, LB)")
+    print("8. Player age and experience data")
+    print("9. Age-based feature engineering")
     
     print("\nNext steps:")
     print("1. Analyze feature importance for real insights")
