@@ -12,7 +12,7 @@ import numpy as np
 from typing import Dict, Optional, Tuple
 
 # Add src to path for imports
-sys.path.append(str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.models.baseline_model import BaselineModel
 from src.data.nfl_data_integration import NFLDataIntegrator
@@ -22,7 +22,7 @@ from src.features.feature_engineering import FeatureEngineer
 class PlayerPredictor:
     """Interactive tool for predicting player performance."""
     
-    def __init__(self, model_path: str = "models/baseline_rf_model.joblib"):
+    def __init__(self, model_path: str = "outputs/models/baseline_rf_model.joblib"):
         """Initialize the predictor with a trained model."""
         self.model_path = Path(model_path)
         self.model = None
@@ -248,7 +248,7 @@ def main():
     parser.add_argument("--player", "-p", required=True, help="Player name (e.g., 'Christian McCaffrey')")
     parser.add_argument("--week", "-w", type=int, required=True, help="Week number (1-18)")
     parser.add_argument("--season", "-s", type=int, default=2023, help="Season year (default: 2023)")
-    parser.add_argument("--model", "-m", default="models/baseline_rf_model.joblib", help="Path to trained model")
+    parser.add_argument("--model", "-m", default="outputs/models/baseline_rf_model.joblib", help="Path to trained model")
     
     args = parser.parse_args()
     

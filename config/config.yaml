@@ -53,5 +53,6 @@ evaluation:
 paths:
   raw_data: "data/raw"
   processed_data: "data/processed"
-  models: "models"
-  results: "results"
+  models: "outputs/models"
+  results: "outputs/reports"
+  predictions: "outputs/predictions"

@@ -138,12 +138,14 @@ data/processed/
 *.xls
 
 # Model files (can be large)
-models/*.joblib
-models/*.pkl
-models/*.h5
+outputs/models/*.joblib
+outputs/models/*.pkl
+outputs/models/*.h5
 
 # Results and outputs
-results/
+outputs/predictions/*.csv
+outputs/reports/*.txt
+outputs/reports/*.pdf
 *.png
 *.jpg
 *.jpeg

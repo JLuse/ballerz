@@ -10,7 +10,7 @@ import pandas as pd
 import joblib
 
 # Add src to path for imports
-sys.path.append(str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.data.collect_data import FantasyDataCollector
 from src.features.feature_engineering import FeatureEngineer
@@ -18,8 +18,8 @@ from src.features.feature_engineering import FeatureEngineer
 
 def load_model():
     """Load the trained model and feature columns."""
-    model_path = Path("models/baseline_rf_model.joblib")
-    feature_path = Path("models/feature_columns.txt")
+    model_path = Path("outputs/models/baseline_rf_model.joblib")
+    feature_path = Path("outputs/models/feature_columns.txt")
     
     if not model_path.exists():
         raise FileNotFoundError("Model not found. Please run train_baseline.py first.")

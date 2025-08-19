@@ -206,7 +206,7 @@ class BaselineModel:
         
         return feature_importance_df
     
-    def load_model(self, model_path: str = "models/baseline_rf_model.joblib"):
+    def load_model(self, model_path: str = "outputs/models/baseline_rf_model.joblib"):
         """
         Load a trained model from disk.
         

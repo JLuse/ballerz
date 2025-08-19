@@ -107,10 +107,11 @@ def main():
     print("  source .venv/bin/activate")
     
     print("\nAfter activation, you can run:")
-    print("  python train_baseline.py          # Train with sample data")
-    print("  python train_with_real_data.py    # Train with real NFL data")
-    print("  python predict.py                 # Make predictions")
-    print("  python -m pytest tests/           # Run tests")
+    print("  python scripts/train_baseline.py          # Train with sample data")
+    print("  python scripts/train_with_real_data.py    # Train with real NFL data")
+    print("  python scripts/predict.py                 # Make predictions")
+    print("  python scripts/interactive_predictor.py   # Interactive predictions")
+    print("  python -m pytest tests/                   # Run tests")
 
 
 if __name__ == "__main__":

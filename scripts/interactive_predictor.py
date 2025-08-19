@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Dict
 
 # Add src to path for imports
-sys.path.append(str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from predict_player import PlayerPredictor
 
@@ -19,7 +19,7 @@ class InteractivePredictor:
     
     def __init__(self):
         """Initialize the interactive predictor."""
-        self.predictor = PlayerPredictor()
+        self.predictor = PlayerPredictor("outputs/models/baseline_rf_model.joblib")
     
     def run(self):
         """Run the interactive prediction tool."""

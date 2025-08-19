@@ -13,7 +13,7 @@ from typing import Dict, List, Optional
 from datetime import datetime
 
 # Add src to path for imports
-sys.path.append(str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from predict_player import PlayerPredictor
 
@@ -21,7 +21,7 @@ from predict_player import PlayerPredictor
 class WeeklyReportGenerator:
     """Generate weekly fantasy football prediction reports."""
     
-    def __init__(self, model_path: str = "models/baseline_rf_model.joblib"):
+    def __init__(self, model_path: str = "outputs/models/baseline_rf_model.joblib"):
         """Initialize the report generator."""
         self.predictor = PlayerPredictor(model_path)
         self.report_data = []
@@ -229,7 +229,7 @@ def main():
     parser.add_argument("--players", "-p", nargs="+", help="List of players to analyze")
     parser.add_argument("--output", "-o", help="Output file for the report")
     parser.add_argument("--csv", "-c", help="Export CSV file")
-    parser.add_argument("--model", "-m", default="models/baseline_rf_model.joblib", help="Path to trained model")
+    parser.add_argument("--model", "-m", default="outputs/models/baseline_rf_model.joblib", help="Path to trained model")
     
     args = parser.parse_args()
     

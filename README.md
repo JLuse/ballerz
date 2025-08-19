@@ -13,18 +13,34 @@ A machine learning tool that predicts whether NFL players will over- or underper
 
 ```
 ballerz/
-├── data/                   # Raw and processed data
-│   ├── raw/               # Original data files
-│   └── processed/         # Cleaned and feature-engineered data
-├── src/                   # Source code
-│   ├── data/             # Data processing modules
-│   ├── models/           # ML model code
-│   ├── features/         # Feature engineering
-│   └── utils/            # Utility functions
-├── notebooks/            # Jupyter notebooks for exploration
-├── tests/               # Unit tests
-├── requirements.txt     # Python dependencies
-└── config/             # Configuration files
+├── scripts/              # Executable scripts
+│   ├── train_baseline.py
+│   ├── train_with_real_data.py
+│   ├── predict.py
+│   ├── predict_player.py
+│   ├── weekly_report.py
+│   └── interactive_predictor.py
+├── docs/                 # Documentation
+│   ├── GETTING_STARTED.md
+│   ├── DATA_SETUP.md
+│   ├── REAL_DATA_ANALYSIS.md
+│   └── INTERACTIVE_FEATURES.md
+├── outputs/              # Generated files
+│   ├── models/          # Trained models
+│   ├── predictions/     # Prediction results
+│   └── reports/         # Generated reports
+├── data/                # Raw and processed data
+│   ├── raw/            # Original data files
+│   └── processed/      # Cleaned and feature-engineered data
+├── src/                 # Source code
+│   ├── data/           # Data processing modules
+│   ├── models/         # ML model code
+│   ├── features/       # Feature engineering
+│   └── utils/          # Utility functions
+├── notebooks/          # Jupyter notebooks for exploration
+├── tests/             # Unit tests
+├── requirements.txt   # Python dependencies
+└── config/           # Configuration files
 ```
 
 ## Getting Started
@@ -65,13 +81,16 @@ chmod +x quick_start.sh
 5. **Run the tool:**
    ```bash
    # Train with sample data
-   python train_baseline.py
+   python scripts/train_baseline.py
    
    # Train with real NFL data
-   python train_with_real_data.py
+   python scripts/train_with_real_data.py
    
    # Make predictions
-   python predict.py
+   python scripts/predict.py
+   
+   # Interactive predictions
+   python scripts/interactive_predictor.py
    ```
 
 ## Development Approach
