@@ -65,6 +65,8 @@ def main():
     """Main prediction function."""
     print("=" * 60)
     print("FANTASY FOOTBALL ANALYTICS - PREDICTION DEMO")
+
+    print("THIS IS A TEST")
     print("=" * 60)
     
     # Load model
