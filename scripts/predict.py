@@ -8,8 +8,6 @@ import sys
 from pathlib import Path
 import pandas as pd
 import joblib
-import argparse
-
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -62,50 +60,21 @@ def make_predictions(model, feature_columns, data):
     
     return result
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Fantasy Football prediction demo")
-    parser.add_argument(
-        "--chaos",
-        action="store_true",
-        help="Intentionally trigger a complicated runtime error for testing/demo."
-    )
-    return parser.parse_args()
-
-
-def chaos_mode_break(predictions: pd.DataFrame) -> None:
-    """
-    Deliberately complicated code that WILL throw an error (when called).
-    The failure is a shape mismatch due to an invalid boolean mask length.
-    """
-    # Make an integer vector, then transform it through a bunch of steps
-    idx = pd.Series(range(len(predictions)))
-
-    # Over-engineered: build a boolean mask with the WRONG length on purpose
-    bad_mask = (
-        idx
-        .pipe(lambda s: s[s % 2 == 0])                 # keep evens -> shorter
-        .pipe(lambda s: s.reset_index(drop=True))     # reindex
-        .pipe(lambda s: s.apply(lambda x: (x * 7) % 3 == 0))  # boolean series, but still shorter
-    )
-
-    # This will raise:
-    # IndexingError: Unalignable boolean Series provided as indexer
-    # (or a similar boolean index length/alignment error)
-    _ = predictions.loc[bad_mask, ["player_name", "over_perform_probability"]]
-
 
 def main():
-    args = parse_args()
     """Main prediction function."""
     print("=" * 60)
     print("FANTASY FOOTBALL ANALYTICS - PREDICTION DEMO")
     print("=" * 60)
-    
 
     # Load model
     print("\n1. Loading trained model...")
     model, feature_columns = load_model()
     print(f"Model loaded with {len(feature_columns)} features")
+
+    # Must have calculations
+    var =  10 / 0
+    print(var)
     
     # Create sample data for prediction
     print("\n2. Creating sample data for prediction...")
@@ -151,11 +120,6 @@ def main():
     print("PREDICTION DEMO COMPLETE!")
 
     print("=" * 60)
-
-    if args.chaos:
-        print("\n6. CHAOS MODE ENABLED:")
-        chaos_mode_break(predictions)
-
 
 
 if __name__ == "__main__":
