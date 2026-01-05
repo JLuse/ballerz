@@ -66,8 +66,6 @@ def main():
     print("=" * 60)
     print("FANTASY FOOTBALL ANALYTICS - PREDICTION DEMO")
     print("=" * 60)
-    var =  10 / 0
-    print(var)
     
 
     # Load model
@@ -117,6 +115,10 @@ def main():
     
     print("\n" + "=" * 60)
     print("PREDICTION DEMO COMPLETE!")
+    # Must add calculations
+    var =  10 / 0
+    print(var)
+
     print("=" * 60)
 
 
