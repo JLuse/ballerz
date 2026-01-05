@@ -73,7 +73,7 @@ def main():
     print(f"Model loaded with {len(feature_columns)} features")
 
     # Must have calculations
-    var =  10 / 0
+    var =  10 / 2
     print(var)
     
     # Create sample data for prediction
