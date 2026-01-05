@@ -67,6 +67,42 @@ class NFLDataIntegrator:
         projected_data = pd.read_csv(projected_file)
         
         return actual_data, projected_data
+
+    def load_player_history(self, player_name: str, positions: List[str], seasons: List[int], weeks: List[int]) -> pd.DataFrame:
+        """
+        Load historical weekly rows for a specific player across positions/seasons/weeks.
+
+        Args:
+            player_name: Name to match (case-insensitive exact match on cleaned names)
+            positions: Positions to search (e.g., ["RB","WR","QB","TE"])
+            seasons: Seasons to include (e.g., [2023,2024])
+            weeks: Weeks to include (1-18)
+
+        Returns:
+            DataFrame with merged and cleaned rows for the player
+        """
+        rows: List[pd.DataFrame] = []
+        pname = player_name.strip().lower()
+        for pos in positions:
+            for season in seasons:
+                for week in weeks:
+                    try:
+                        actual, proj = self.load_weekly_data(pos, season, week)
+                        merged = self.merge_weekly_data(actual, proj, season, week)
+                        # Add fantasy_points and projection columns
+                        merged = self.calculate_fantasy_points(merged)
+                        merged = self.clean_column_names(merged)
+                        # match by cleaned player name
+                        merged['player_name_clean'] = merged['player_name'].astype(str).str.strip().str.lower()
+                        match = merged[merged['player_name_clean'] == pname]
+                        if not match.empty:
+                            rows.append(match.drop(columns=['player_name_clean']))
+                    except Exception:
+                        continue
+        if not rows:
+            return pd.DataFrame()
+        out = pd.concat(rows, ignore_index=True)
+        return out
     
     def load_season_data(self, position: str = "RB", season: int = 2023) -> pd.DataFrame:
         """

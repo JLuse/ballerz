@@ -6,6 +6,7 @@ Implements a Random Forest classifier to predict over/under performance.
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 from sklearn.preprocessing import StandardScaler
@@ -35,6 +36,7 @@ class BaselineModel:
         self.model_config = get_model_config(self.config)
         self.paths = get_data_paths(self.config)
         self.model = None
+        self.importance_model = None
         self.scaler = StandardScaler()
         self.feature_columns = None
         
@@ -103,8 +105,8 @@ class BaselineModel:
         # Get model parameters from config
         rf_params = self.model_config.get('random_forest', {})
         
-        # Create and train model
-        self.model = RandomForestClassifier(
+        # Base model
+        base_model = RandomForestClassifier(
             n_estimators=rf_params.get('n_estimators', 100),
             max_depth=rf_params.get('max_depth', 10),
             min_samples_split=rf_params.get('min_samples_split', 5),
@@ -112,8 +114,17 @@ class BaselineModel:
             random_state=self.model_config.get('random_state', 42),
             n_jobs=-1
         )
-        
-        # Train the model
+
+        # Train a separate copy for feature importances
+        try:
+            from sklearn.base import clone
+            self.importance_model = clone(base_model)
+            self.importance_model.fit(X, y)
+        except Exception:
+            self.importance_model = None
+
+        # Probability calibration for better confidence estimates
+        self.model = CalibratedClassifierCV(base_model, method='isotonic', cv=3)
         self.model.fit(X, y)
         
         print("Model training complete!")
@@ -194,8 +205,15 @@ class BaselineModel:
         if self.model is None:
             raise ValueError("Model must be trained before analyzing feature importance")
         
-        # Get feature importance
-        importance = self.model.feature_importances_
+        # Get feature importance from calibrated model's base or fallback importance_model
+        importance = None
+        if hasattr(self.model, 'feature_importances_'):
+            importance = self.model.feature_importances_
+        elif self.importance_model is not None and hasattr(self.importance_model, 'feature_importances_'):
+            importance = self.importance_model.feature_importances_
+        else:
+            print("No feature_importances_ available; skipping importance analysis.")
+            return pd.DataFrame(columns=['feature','importance'])
         feature_importance_df = pd.DataFrame({
             'feature': self.feature_columns,
             'importance': importance
@@ -290,11 +308,16 @@ class BaselineModel:
         if self.model is None:
             raise ValueError("No model loaded. Call load_model() first.")
         
-        if not hasattr(self.model, 'feature_importances_'):
+        # Try calibrated model's base or fallback importance_model
+        if hasattr(self.model, 'feature_importances_'):
+            importances = self.model.feature_importances_
+        elif self.importance_model is not None and hasattr(self.importance_model, 'feature_importances_'):
+            importances = self.importance_model.feature_importances_
+        else:
             return []
         
         feature_importance = []
-        for i, importance in enumerate(self.model.feature_importances_):
+        for i, importance in enumerate(importances):
             feature_name = self.feature_columns[i] if self.feature_columns else f"feature_{i}"
             feature_importance.append({
                 "feature": feature_name,

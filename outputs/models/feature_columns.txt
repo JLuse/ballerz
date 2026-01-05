@@ -1,15 +1,3 @@
-PassingYDS_actual
-PassingTD_actual
-PassingInt_actual
-RushingYDS_actual
-RushingTD_actual
-ReceivingRec_actual
-ReceivingYDS_actual
-ReceivingTD_actual
-RetTD_actual
-FumTD_actual
-2PT_actual
-Fum_actual
 FanPtsAgainst-pts
 carries
 TouchReceptions
@@ -20,8 +8,6 @@ ReceptionPercentage
 RzTarget
 RzTouch
 RzG2G
-Rank_actual
-TotalPoints_actual
 PassingYDS_projected
 PassingTD_projected
 PassingInt_projected
@@ -37,7 +23,6 @@ Fum_projected
 PlayerWeekProjectedPts
 Rank_projected
 TotalPoints_projected
-ProjectionDiff
 player_age
 games_played
 games_started

@@ -55,16 +55,16 @@ class FeatureEngineer:
         for window in rolling_windows:
             for stat in stat_columns:
                 if stat in df.columns:
-                    # Rolling average
+                    # Use past-only values to avoid leakage (shift by 1 week)
                     col_name = f'{stat}_rolling_{window}'
                     df[col_name] = df.groupby(player_col)[stat].transform(
-                        lambda x: x.rolling(window=window, min_periods=1).mean()
+                        lambda x: x.shift(1).rolling(window=window, min_periods=1).mean()
                     )
-                    
-                    # Rolling standard deviation (volatility)
+
+                    # Rolling standard deviation (volatility) on past-only values
                     col_name_std = f'{stat}_rolling_{window}_std'
                     df[col_name_std] = df.groupby(player_col)[stat].transform(
-                        lambda x: x.rolling(window=window, min_periods=2).std().fillna(0)
+                        lambda x: x.shift(1).rolling(window=window, min_periods=2).std().fillna(0)
                     )
         
         return df
@@ -90,18 +90,19 @@ class FeatureEngineer:
         
         for stat in trend_stats:
             if stat in df.columns:
-                # Recent vs previous performance (last 3 vs previous 3)
-                df[f'{stat}_trend_3v3'] = df.groupby(player_col)[stat].transform(
-                    lambda x: x.rolling(3, min_periods=3).mean() - 
-                             x.rolling(6, min_periods=6).mean().shift(3)
-                )
-                
-                # Week-over-week change
-                df[f'{stat}_week_change'] = df.groupby(player_col)[stat].diff()
-                
-                # Performance consistency (lower std = more consistent)
+                # Use past-only values
+                def recent_vs_previous(x):
+                    recent = x.shift(1).rolling(3, min_periods=3).mean()
+                    previous = x.shift(4).rolling(3, min_periods=3).mean()
+                    return recent - previous
+                df[f'{stat}_trend_3v3'] = df.groupby(player_col)[stat].transform(recent_vs_previous)
+
+                # Week-over-week change based on past-only values
+                df[f'{stat}_week_change'] = df.groupby(player_col)[stat].transform(lambda x: x.shift(1) - x.shift(2))
+
+                # Performance consistency (lower std = more consistent) on past-only
                 df[f'{stat}_consistency'] = df.groupby(player_col)[stat].transform(
-                    lambda x: 1 / (1 + x.rolling(5, min_periods=3).std())
+                    lambda x: 1 / (1 + x.shift(1).rolling(5, min_periods=3).std())
                 )
         
         return df
@@ -119,18 +120,19 @@ class FeatureEngineer:
         print("Creating projection-related features...")
         
         if 'projection' in df.columns:
-            # Projection accuracy in recent weeks
-            df['projection_error'] = df['fantasy_points'] - df['projection']
-            
-            # Rolling projection accuracy
+            # Projection accuracy in recent weeks (past-only)
+            # Compute error then shift by 1 within player to ensure past-only
+            df['projection_error'] = (df['fantasy_points'] - df['projection']).groupby(df['player_name']).shift(1)
+
+            # Rolling projection accuracy (past-only)
             df['projection_accuracy_rolling_5'] = df.groupby('player_name')['projection_error'].transform(
                 lambda x: x.rolling(5, min_periods=3).mean()
             )
-            
-            # Projection vs recent performance
+
+            # Projection vs recent performance (current projection vs past recent performance)
             df['projection_vs_recent'] = df['projection'] - df['fantasy_points_rolling_3']
-            
-            # Projection confidence (based on recent volatility)
+
+            # Projection confidence (based on past volatility)
             df['projection_confidence'] = 1 / (1 + df['fantasy_points_rolling_3_std'])
         
         return df
@@ -229,6 +231,32 @@ class FeatureEngineer:
         
         return df_engineered
     
+    def engineer_features_for_inference(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Feature engineering for inference (no target required).
+        Uses past-only information; allows current row to have unknown actuals.
+
+        Args:
+            df: DataFrame containing past weeks plus the target week row
+
+        Returns:
+            DataFrame with engineered features for inference
+        """
+        print("Starting inference feature engineering...")
+        df_features = df.copy()
+
+        df_features = self.create_rolling_features(df_features)
+        df_features = self.create_trend_features(df_features)
+        df_features = self.create_projection_features(df_features)
+        df_features = self.create_context_features(df_features)
+
+        # Fill numeric NaNs with 0
+        numeric_cols = df_features.select_dtypes(include=[np.number]).columns
+        df_features[numeric_cols] = df_features[numeric_cols].fillna(0)
+
+        print(f"Inference features created: {len(df_features.columns)} columns")
+        return df_features
+
     def get_feature_columns(self, df: pd.DataFrame) -> List[str]:
         """
         Get list of feature columns (excluding target and metadata).
@@ -243,12 +271,23 @@ class FeatureEngineer:
         exclude_cols = {
             'target', 'player_name', 'team', 'position', 'season', 'week',
             'fantasy_points', 'projection', 'over_performed', 'performance_diff',
-            'player_id', 'opponent'  # Also exclude categorical columns
+            'player_id', 'opponent'
         }
+
+        # Exclude raw current-week actuals and leakage-prone columns by pattern
+        blacklist_patterns = (
+            '_actual',
+            'TotalPoints_actual',
+            'Rank_actual',
+            'ProjectionDiff',
+        )
         
         # Only include numeric columns
         numeric_cols = df.select_dtypes(include=['number']).columns
-        feature_cols = [col for col in numeric_cols if col not in exclude_cols]
+        feature_cols = [
+            col for col in numeric_cols
+            if col not in exclude_cols and not any(pat in col for pat in blacklist_patterns)
+        ]
         
         print(f"Identified {len(feature_cols)} numeric feature columns")
         return feature_cols
